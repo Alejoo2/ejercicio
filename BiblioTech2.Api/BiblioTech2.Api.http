@@ -1,0 +1,5 @@
+@host = https://localhost:7180
+@token =
+
+### Documento OpenAPI (prueba que la API responde)
+GET {{host}}/openapi/v1.json
