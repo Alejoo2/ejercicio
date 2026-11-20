@@ -1,6 +1,4 @@
 using Scalar.AspNetCore;
-using BiblioTech2.Api.Services.Interfaces;
-using BiblioTech2.Api.Services;
 using BiblioTech2.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using BiblioTech.Api.Services.Interfaces;

@@ -29,15 +29,17 @@ public class AutoresController(IAutorService servicio) : ControllerBase
     }
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Actualizar(int id, AutorGuardarDto dto)
-        => await servicio.ActualizarAsync(id, dto) ? NoContent() : NotFound();
+    {
+        await servicio.ActualizarAsync(id, dto);
+        return NoContent();
+    }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult>Eliminar(int id) 
-        => await servicio.EliminarAsync(id) ? NoContent() : NotFound();
+    public async Task<IActionResult> Eliminar(int id)
+    {
+        await servicio.EliminarAsync(id);
+        return NoContent();
 
-
-
-
-
+    }
 
 }

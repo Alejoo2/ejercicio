@@ -1,4 +1,5 @@
-﻿using BiblioTech2.Api.Exceptions;
+﻿using BiblioTech.Api.Exceptions;
+using BiblioTech2.Api.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 namespace BiblioTech2.Api.Middleware;
@@ -33,11 +34,11 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         var (codigo, titulo, detalle) = ex switch
         {
             NoEncontradoException e => (StatusCodes.Status404NotFound, "Recurso no encontrado", e.Message),
-            DbUpdateException e => (StatusCodes.Status409Conflict, "Conflicto con los datos", TraducirErrorBaseDatos(e)),
+            ReglaNegocioException e => (StatusCodes.Status409Conflict, "Regla de negocio", e.Message),
+           DbUpdateException e => (StatusCodes.Status409Conflict, "Conflicto con los datos", TraducirErrorBaseDatos(e)),
             _ => (StatusCodes.Status500InternalServerError, "Error interno",
                   "Ocurrió un error inesperado. Intenta de nuevo más tarde.")
         };
-
         if (codigo == StatusCodes.Status500InternalServerError)
             logger.LogError(ex, "Error no controlado en {Ruta}", contexto.Request.Path);
         else
@@ -52,19 +53,19 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         };
 
         contexto.Response.StatusCode = codigo;
-        await contexto.Response.WriteAsJsonAsync(problema, options: null, contentType: "application/problem+json");
+        await contexto.Response.WriteAsJsonAsync(problema, options: null, contentType:
+            "application/problem+json");
+
     }
 
     private static string TraducirErrorBaseDatos(DbUpdateException ex)
     {
         var mensajeSql = ex.InnerException?.Message ?? ex.Message;
-
-        foreach (var (restriccion, mensaje) in MensajeRestricciones)
+        foreach(var (restriccion, mensaje) in MensajeRestricciones)
         {
             if (mensajeSql.Contains(restriccion, StringComparison.OrdinalIgnoreCase))
                 return mensaje;
         }
-
-        return "La operación viola una restricción de la base de datos.";
+        return "La operacion viola una restriccion de la base de datos";
     }
 }

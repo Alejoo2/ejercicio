@@ -1,7 +1,7 @@
 ﻿using BiblioTech.Api.DTOs.Autores;
-//using BiblioTech.Api.Exceptions;
 using BiblioTech.Api.Services.Interfaces;
 using BiblioTech2.Api.Data;
+using BiblioTech2.Api.Exceptions;
 using BiblioTech2.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,7 +32,8 @@ public  class AutorService(BibliotecaContext db) : IAutorService
                 Nacionalidad = a.Nacionalidad,
                 CantidadLibros = a.Libros.Count
             })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new NoEncontradoException($"El autor {id} no existe.");
     }
 
     public async Task<AutorDto> CrearAsync(AutorGuardarDto dto)
@@ -47,31 +48,30 @@ public  class AutorService(BibliotecaContext db) : IAutorService
         return new AutorDto { Id = autor.Id, Nombre = autor.Nombre, Nacionalidad = autor.Nacionalidad };
     }
 
-    public async Task <bool> ActualizarAsync(int id, AutorGuardarDto dto)
+    public async Task  ActualizarAsync(int id, AutorGuardarDto dto)
     {
-        var autor = await db.Autores.FindAsync(id);
-        if (autor == null)
-            return false;
+        var autor = await db.Autores.FindAsync(id)
+            ?? throw new NoEncontradoException($"El autor {id} no existe.");
+        
 
         autor.Nombre = dto.Nombre.Trim();
         autor.Nacionalidad = string.IsNullOrWhiteSpace(dto.Nacionalidad) ? null: dto.Nacionalidad.Trim();
 
         await db.SaveChangesAsync();
-        return true;
+        
     }
 
-    public async Task <bool> EliminarAsync(int id)
+    public async Task  EliminarAsync(int id)
     {
-        var autor = await db.Autores.FindAsync(id);
-        if (autor == null)
-            return false;
+        var autor = await db.Autores.FindAsync(id)
+            ?? throw new NoEncontradoException($"El autor {id} no existe.");
+        
 
         var cantidadLibros = await db.Libros.CountAsync(l => l.Autores.Any(a => a.Id == id));
         if (cantidadLibros > 0)
 
             db.Autores.Remove(autor);
         await db.SaveChangesAsync();
-        return true; 
     }
 }
 
