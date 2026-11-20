@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>8d55bff9-3b34-4363-a630-9e13c15ce676</UserSecretsId>
+    <UserSecretsId>f20f3ba9-991d-4473-bef2-17d4d6572565</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,11 +27,9 @@
     <Folder Include="Controllers\" />
     <Folder Include="Constants\" />
     <Folder Include="Configuracion\" />
-    <Folder Include="DTOs\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Middleware\" />
     <Folder Include="Models\" />
-    <Folder Include="Services\Interfaces\" />
   </ItemGroup>
 
 </Project>
