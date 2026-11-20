@@ -47,24 +47,31 @@ public  class AutorService(BibliotecaContext db) : IAutorService
         return new AutorDto { Id = autor.Id, Nombre = autor.Nombre, Nacionalidad = autor.Nacionalidad };
     }
 
-    public async Task ActualizarAsync(int id, AutorGuardarDto dto)
+    public async Task <bool> ActualizarAsync(int id, AutorGuardarDto dto)
     {
         var autor = await db.Autores.FindAsync(id);
+        if (autor == null)
+            return false;
+
         autor.Nombre = dto.Nombre.Trim();
         autor.Nacionalidad = string.IsNullOrWhiteSpace(dto.Nacionalidad) ? null: dto.Nacionalidad.Trim();
 
         await db.SaveChangesAsync();
+        return true;
     }
 
-    public async Task EliminarAsync(int id)
+    public async Task <bool> EliminarAsync(int id)
     {
         var autor = await db.Autores.FindAsync(id);
+        if (autor == null)
+            return false;
 
         var cantidadLibros = await db.Libros.CountAsync(l => l.Autores.Any(a => a.Id == id));
         if (cantidadLibros > 0)
 
             db.Autores.Remove(autor);
-        await db.SaveChangesAsync();   
+        await db.SaveChangesAsync();
+        return true; 
     }
 }
 
