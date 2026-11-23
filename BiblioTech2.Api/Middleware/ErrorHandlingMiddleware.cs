@@ -18,7 +18,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         ["CK_Socios_Email"] = "El correo no tiene un formato valido"
     };
 
-    public async Task InvokeAsyng(HttpContext contexto)
+    public async Task InvokeAsync(HttpContext contexto)
     {
         try
         {
