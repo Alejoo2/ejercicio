@@ -16,6 +16,7 @@ public static class ServiciosExtensions
     {
         services.AddScoped<IAutorService, AutorService>();
         services.AddScoped<ILibroService, LibroService>();
+        services.AddScoped<ISocioService, SocioService>();
         return services;
     }
 
