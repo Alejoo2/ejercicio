@@ -1,13 +1,14 @@
 using Scalar.AspNetCore;
+using BiblioTech2.Api.Configuracion;
 using BiblioTech2.Api.Data;
 using BiblioTech2.Api.Middleware;
 using BiblioTech2.Api.Respuestas;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BiblioTech.Api.Services.Interfaces;
-using BiblioTech.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ---------- 1. SERVICIOS ----------
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(opciones =>
@@ -36,11 +37,15 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<BibliotecaContext>(opciones =>
     opciones.UseSqlServer(builder.Configuration.GetConnectionString("BiblioTechConnection")));
 
-builder.Services.AddScoped<IAutorService, AutorService>();
+builder.Services.AddServiciosBiblioteca();              // Configuracion/ServiciosExtensions.cs
+builder.Services.AddCorsWeb(builder.Configuration);     // Configuracion/ServiciosExtensions.cs
 
 var app = builder.Build();
 
-app.UseMiddleware<ErrorHandlingMiddleware>(); 
+// ---------- 2. PIPELINE (el orden importa) ----------
+
+app.UseCors(ServiciosExtensions.PoliticaCors);  // antes del middleware: así hasta los errores llevan el permiso CORS
+app.UseMiddleware<ErrorHandlingMiddleware>();   // red de seguridad: envuelve a todo lo demás
 
 if (app.Environment.IsDevelopment())
 {
