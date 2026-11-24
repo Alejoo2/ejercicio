@@ -1,40 +1,55 @@
 using Scalar.AspNetCore;
 using BiblioTech2.Api.Data;
+using BiblioTech2.Api.Middleware;
+using BiblioTech2.Api.Respuestas;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BiblioTech.Api.Services.Interfaces;
 using BiblioTech.Api.Services;
-var builder = WebApplication.CreateBuilder(args);  // inicializa una nueva instancia, encargada de leer la configuración de la aplicación (appsettings.json, variables de entorno, etc.)
-                                                   // y de configurar los servicios que la aplicación necesita para funcionar correctamente)
 
-// Add services to the container.
+var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(); // llama a la carpeta Controllers y registra todos los controladores que encuentre en ella, para que puedan ser utilizados por la aplicación
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi(); // scalar 
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(opciones =>
+    {
+        // Cuando fallan las validaciones del DTO ([Required], [StringLength]...)
+        // respondemos con el mismo formato RespuestaApi en lugar del ProblemDetails por defecto.
+        opciones.InvalidModelStateResponseFactory = contexto =>
+        {
+            var errores = contexto.ModelState
+                .Where(campo => campo.Value!.Errors.Count > 0)
+                .ToDictionary(
+                    campo => campo.Key,
+                    campo => campo.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+
+            return new BadRequestObjectResult(new RespuestaApi<object>
+            {
+                Exito = false,
+                Mensaje = "Los datos enviados no son válidos.",
+                Errores = errores
+            });
+        };
+    });
+
+builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<BibliotecaContext>(opciones =>
+    opciones.UseSqlServer(builder.Configuration.GetConnectionString("BiblioTechConnection")));
 
 builder.Services.AddScoped<IAutorService, AutorService>();
 
-
- // toma la configuracion y los servicios que de declararon posteriormente y construye la aplicación,
-                           // pasando al estado para recibir solicitudes HTTP y generar respuestas
-builder.Services.AddDbContext<BibliotecaContext>(opciones =>
-opciones.UseSqlServer(builder.Configuration.GetConnectionString("BiblioTechConnection")));
-
 var app = builder.Build();
 
-// parte dos Pipeline de la aplicación, que se encarga de procesar las solicitudes HTTP entrantes y generar las respuestas correspondientes
+app.UseMiddleware<ErrorHandlingMiddleware>(); 
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference(); 
+    app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection(); //si la solicitud entrante es HTTP, la redirige a HTTPS para garantizar una comunicación segura entre el cliente y el servidor
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 
-app.UseAuthorization(); //se encarga de verificar si el usuario que realiza la solicitud tiene los permisos necesarios para acceder a los recursos protegidos de la aplicación.
-
-app.MapControllers(); //mapea las rutas de los controladores registrados en la aplicación, para que puedan ser accedidos a través de las solicitudes HTTP entrantes
-
-app.Run(); // arranca la aplicación y comienza a escuchar las solicitudes HTTP entrantes, procesándolas a través del pipeline configurado anteriormente.
+app.Run();
