@@ -15,6 +15,7 @@ public static class ServiciosExtensions
     public static IServiceCollection AddServiciosBiblioteca(this IServiceCollection services)
     {
         services.AddScoped<IAutorService, AutorService>();
+        services.AddScoped<ILibroService, LibroService>();
         return services;
     }
 
