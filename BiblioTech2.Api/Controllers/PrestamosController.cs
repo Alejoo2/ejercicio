@@ -1,6 +1,7 @@
 using BiblioTech.Api.DTOs.Prestamos;
 using BiblioTech.Api.Services.Interfaces;
 using BiblioTech2.Api.Respuestas;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BiblioTech2.Api.Controllers;
@@ -23,6 +24,7 @@ public class PrestamosController(IPrestamoService servicio) : ApiControllerBase
         => Responder(await servicio.ListarVencidosAsync());
 
     /// <summary>POST api/prestamos  { "libroId": 2, "socioId": 4 }  → prestar</summary>
+    [Authorize]   // 🔒 escribir requiere token
     [HttpPost]
     public async Task<ActionResult<RespuestaApi<PrestamoDto>>> Prestar(PrestamoCrearDto dto)
     {
@@ -35,6 +37,7 @@ public class PrestamosController(IPrestamoService servicio) : ApiControllerBase
     }
 
     /// <summary>PUT api/prestamos/5/devolver → registrar la devolución</summary>
+    [Authorize]   // 🔒 escribir requiere token
     [HttpPut("{id:int}/devolver")]
     public async Task<ActionResult<RespuestaApi<object>>> Devolver(int id)
         => Responder(await servicio.DevolverAsync(id));

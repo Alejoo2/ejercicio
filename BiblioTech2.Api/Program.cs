@@ -32,13 +32,14 @@ builder.Services.AddControllers()
         };
     });
 
-builder.Services.AddOpenApi();
-
 builder.Services.AddDbContext<BibliotecaContext>(opciones =>
     opciones.UseSqlServer(builder.Configuration.GetConnectionString("BiblioTechConnection")));
 
-builder.Services.AddServiciosBiblioteca();              // Configuracion/ServiciosExtensions.cs
-builder.Services.AddCorsWeb(builder.Configuration);     // Configuracion/ServiciosExtensions.cs
+// Todo esto está en Configuracion/ServiciosExtensions.cs
+builder.Services.AddServiciosBiblioteca();
+builder.Services.AddCorsWeb(builder.Configuration);
+builder.Services.AddAutenticacionJwt(builder.Configuration);
+builder.Services.AddOpenApiConJwt();
 
 var app = builder.Build();
 
@@ -54,7 +55,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
+app.UseAuthentication();   // 1° ¿quién eres? (lee y valida el token)
+app.UseAuthorization();    // 2° ¿puedes hacer esto? ([Authorize])
 app.MapControllers();
 
 app.Run();

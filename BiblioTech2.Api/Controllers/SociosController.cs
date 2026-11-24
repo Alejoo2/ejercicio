@@ -1,6 +1,7 @@
 using BiblioTech.Api.DTOs.Socios;
 using BiblioTech.Api.Services.Interfaces;
 using BiblioTech2.Api.Respuestas;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BiblioTech2.Api.Controllers;
@@ -17,6 +18,7 @@ public class SociosController(ISocioService servicio) : ApiControllerBase
     public async Task<ActionResult<RespuestaApi<SocioDto>>> Obtener(int id)
         => Responder(await servicio.ObtenerAsync(id));
 
+    [Authorize]   // 🔒 escribir requiere token
     [HttpPost]
     public async Task<ActionResult<RespuestaApi<SocioDto>>> Crear(SocioGuardarDto dto)
     {
@@ -28,11 +30,13 @@ public class SociosController(ISocioService servicio) : ApiControllerBase
             RespuestaApi<SocioDto>.Desde(resultado));
     }
 
+    [Authorize]   // 🔒 escribir requiere token
     [HttpPut("{id:int}")]
     public async Task<ActionResult<RespuestaApi<object>>> Actualizar(int id, SocioGuardarDto dto)
         => Responder(await servicio.ActualizarAsync(id, dto));
 
     /// <summary>PATCH api/socios/5/estado  { "activo": false }  → activar o desactivar (no se eliminan).</summary>
+    [Authorize]   // 🔒 escribir requiere token
     [HttpPatch("{id:int}/estado")]
     public async Task<ActionResult<RespuestaApi<object>>> CambiarEstado(int id, SocioEstadoDto dto)
         => Responder(await servicio.CambiarEstadoAsync(id, dto.Activo!.Value));
